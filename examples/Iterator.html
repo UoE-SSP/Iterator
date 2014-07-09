@@ -1,0 +1,29 @@
+<form action="https://cors-test.appspot.com/test">
+	<button id=button style="opacity:0.5;">You would normally click me</button>
+</form>
+<div id=progress style="background-color:#DDD;width:0%;height:16px;transition:width 0.5s ease-in;"></div>
+
+
+<script src="http://ajax.googleapis.com/ajax/libs/jquery/2.1.1/jquery.min.js"></script>
+<script src="../Iterator.jquery.js"></script>
+<script>
+// Create Iterator
+var names = ['Peter','Andrew','James','John','Philip','Bartholomew','Matthew','Thomas','Simon','Judas'],
+	i = new Iterator( names, $('button'));
+
+// Add events
+i.on('start', function(){console.log('start');});
+i.on('beforeSave', function( row, index ){
+	console.log( 'Sending:', row ); /* You might edit form data here */
+});
+i.on('afterSave', function( row, index ){
+	console.log( 'Done:', row ); $('progress').css( 'width', (100 * (index+1) / names.length) + '%' );
+});
+i.on('error', function(error){
+	console.log('An error occurred (' + error + ')');
+});
+i.on('end', function(){console.log('end');});
+
+// Start the iterator
+i.start();
+</script>
