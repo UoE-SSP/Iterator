@@ -12,17 +12,21 @@ var names = ['Peter','Andrew','James','John','Philip','Bartholomew','Matthew','T
 	i = new Iterator( names, $('#button'));
 
 // Add events
-i.on('start', function(){console.log('start');});
-i.on('beforeSave', function( row, index ){
-	console.log( 'Sending:', row ); /* You might edit form data here */
-});
-i.on('afterSave', function( row, index ){
-	console.log( 'Done:', row ); $('#progress').css( 'width', (100 * (index+1) / names.length) + '%' );
-});
-i.on('error', function(error){
+i.on('start', function(){
+	console.log('start');
+}).on('beforeSave', function( row, index ){
+	console.log( 'Sending:', row ); // You might edit form data here
+}).on('afterSave', function( row, index ){
+	console.log( 'Done:', row );
+	$('#progress').css( 'width', (100 * (index+1) / names.length) + '%' );
+	// Pause the process on a certain row, suitable for error catching
+	if( row === 'John' ) {
+		$('#progress').after( $('<button>').html('Continue').click(function(){i.resume()}) )
+		return false;
+	}
+}).on('error', function(error){
 	console.log('An error occurred (' + error + ')');
-});
-i.on('end', function(){console.log('end');});
+}).on('end', function(){console.log('end');});
 
 // Start the iterator
 i.start();

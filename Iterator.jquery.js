@@ -12,6 +12,7 @@ function Iterator( inIterator, inButton ) {
 	this.on = function( event, callback ) {
 		if( typeof callback === 'function' && typeof events[event] !== 'undefined' )
 			events[event].push( callback );
+		return this;
 	}
 	
 	// Raise an event
@@ -34,28 +35,42 @@ function Iterator( inIterator, inButton ) {
 			return false;
 		}
 		
+		// Reset the index
+		index = -1;
+		
 		// Hide the go button
 		raiseEvent('start');
-		
-		// Create an iterating function that runs the TUD for each row
-		function onSave() {
-			if( index > -1 && raiseEvent('afterSave', [ iterator[index], index ]) === false )
-				return false;
-			index++;
-			if( index > iterator.length - 1 ) {
-				raiseEvent('end');
-				return false;
-			}
-			if( raiseEvent('beforeSave', [ iterator[index], index ]) )
-				save().done( onSave ).fail( onError );
+		this.resume();
+	}
+	
+	// Create an iterating function that runs the TUD for each row
+	function onSave() {
+		if( index > -1 && raiseEvent('afterSave', [ iterator[index], index ]) === false )
+			return false;
+		iterate();
+	}
+	
+	// When an error occurs, bail if we're told to
+	function onError( xhr, textStatus, errorThrown ) {
+		if( !raiseEvent('error', [errorThrown, xhr, textStatus]) )
+			onSave();
+	}
+	
+	// The iterative function
+	function iterate() {
+		index++;
+		if( index > iterator.length - 1 ) {
+			raiseEvent('end');
+			return false;
 		}
-		// When an error occurs, bail if we're told to
-		function onError( xhr, textStatus, errorThrown ) {
-			if( !raiseEvent('error', [errorThrown, xhr, textStatus]) )
-				onSave();
-		}
+		if( raiseEvent('beforeSave', [ iterator[index], index ]) )
+			save().done( onSave ).fail( onError );
+	}
+	
+	this.resume = function() {
 		// Start iterating
-		onSave();
+		iterate();
+		return this;
 	}
 	
 	// Overwrite the save function with AJAX
