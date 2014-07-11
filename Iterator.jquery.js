@@ -1,5 +1,5 @@
 function Iterator( inIterator, inButton ) {
-	var button, iterator, index = -1, events = {start:[],beforeSave:[],afterSave:[],end:[],error:[]};
+	var button, iterator, index = -1, events = {start:[],beforeSubmit:[],afterSubmit:[],end:[],error:[]};
 	// Setters
 	this.setIterator = function( i ) { iterator = i; }
 	this.setButton = function( b ) { button = b; }
@@ -44,8 +44,8 @@ function Iterator( inIterator, inButton ) {
 	}
 	
 	// Create an iterating function that runs the TUD for each row
-	function onSave() {
-		if( index > -1 && raiseEvent('afterSave', [ iterator[index], index ]) === false )
+	function onSubmit( resp ) {
+		if( index > -1 && raiseEvent('afterSubmit', [ iterator[index], index, resp ]) === false )
 			return false;
 		iterate();
 	}
@@ -53,7 +53,7 @@ function Iterator( inIterator, inButton ) {
 	// When an error occurs, bail if we're told to
 	function onError( xhr, textStatus, errorThrown ) {
 		if( !raiseEvent('error', [errorThrown, xhr, textStatus]) )
-			onSave();
+			onSubmit();
 	}
 	
 	// The iterative function
@@ -63,8 +63,8 @@ function Iterator( inIterator, inButton ) {
 			raiseEvent('end');
 			return false;
 		}
-		if( raiseEvent('beforeSave', [ iterator[index], index ]) )
-			save().done( onSave ).fail( onError );
+		if( raiseEvent('beforeSubmit', [ iterator[index], index ]) )
+			submit().done( onSubmit ).fail( onError );
 	}
 	
 	this.resume = function() {
@@ -73,14 +73,14 @@ function Iterator( inIterator, inButton ) {
 		return this;
 	}
 	
-	// Overwrite the save function with AJAX
-	function save() {
+	// Overwrite the form submission with AJAX
+	function submit() {
 		var $button = $( button ),
 			$form = $button.parents('form').first(),
 			url = $form.attr('action'),
 			data = $form.serialize();
 
-		// Add the clicked button to the sent data, otherwise SITS won't be fooled!
+		// Add the clicked button to the sent data
 		data = data + '&' + encodeURIComponent($button.attr('name')) + '=' + encodeURIComponent($button.val());
 
 		// Send the submission over AJAX

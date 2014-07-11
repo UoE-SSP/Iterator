@@ -14,9 +14,9 @@ var names = ['Peter','Andrew','James','John','Philip','Bartholomew','Matthew','T
 // Add events
 i.on('start', function(){
 	console.log('start');
-}).on('beforeSave', function( row, index ){
+}).on('beforeSubmit', function( row, index ){
 	console.log( 'Sending:', row ); // You might edit form data here
-}).on('afterSave', function( row, index ){
+}).on('afterSubmit', function( row, index ){
 	console.log( 'Done:', row );
 	$('#progress').css( 'width', (100 * (index+1) / names.length) + '%' );
 	// Pause the process on a certain row, suitable for error catching
