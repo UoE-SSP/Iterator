@@ -1,8 +1,13 @@
 function Iterator( inIterator, inButton ) {
-	var button, iterator, index = -1, events = {start:[],beforeSubmit:[],afterSubmit:[],end:[],error:[]};
+	var button, iterator, options = {}, index = -1, events = {start:[],beforeSubmit:[],afterSubmit:[],end:[],error:[]};
 	// Setters
 	this.setIterator = function( i ) { iterator = i; }
 	this.setButton = function( b ) { button = b; }
+    this.options = function( obj ) {
+        for( var i in obj )
+            options[i] = obj[i];
+        return this;
+    }
 	
 	// Setting on creation
 	if( typeof inIterator !== 'undefined' ) this.setIterator( inIterator );
@@ -84,10 +89,13 @@ function Iterator( inIterator, inButton ) {
 		data = data + '&' + encodeURIComponent($button.attr('name')) + '=' + encodeURIComponent($button.val());
 
 		// Send the submission over AJAX
-		return $.ajax({
+        ajaxObj = {
 			type: "POST",
 			url: url,
 			data: data
-		});
+		};
+        if( options.json )
+            ajaxObj.dataType = 'json';
+		return $.ajax(ajaxObj);
 	}
 }
